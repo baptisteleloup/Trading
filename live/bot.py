@@ -17,7 +17,8 @@ from datetime import datetime, timezone
 import config
 import signals.trend_following as bear_strategy
 import signals.trend_bull as bull_strategy
-from regime.classifier import classify, Regime
+from regime.composite import classify_composite, CompositeResult
+from regime.classifier import Regime
 from live.exchange import BinanceFuturesExchange
 from live.order_manager import OrderManager
 from live.position_tracker import Position, PositionTracker
@@ -84,9 +85,13 @@ class TradingBot:
         # Check regime periodically
         if self._tick_count % self._regime_check_interval == 1:
             try:
-                result = classify(self.symbols[0], testnet=self.testnet)
+                result = classify_composite(self.symbols[0], testnet=self.testnet)
                 self._current_regime = result.regime
-                logger.info("Regime: %s (score=%d) at %s", result.regime.value, result.score, now)
+                logger.info(
+                    "Regime: %s (score=%+d = tech %+d + sent %+d) at %s",
+                    result.regime.value, result.score,
+                    result.technical_score, result.sentiment_score, now,
+                )
             except Exception as exc:
                 logger.error("Regime classification failed: %s", exc)
 

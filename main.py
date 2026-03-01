@@ -4,8 +4,6 @@ Bear Trader — Binance Futures Bear Market Algo Trading System
 
 Usage examples:
   python main.py --mode backtest --strategy trend --symbol BTC/USDT:USDT
-  python main.py --mode backtest --strategy breakdown --symbol ETH/USDT:USDT
-  python main.py --mode dryrun --strategy trend breakdown --symbol BTC/USDT:USDT
   python main.py --mode live --strategy trend --symbol BTC/USDT:USDT
 
 Safety:
@@ -37,7 +35,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--strategy",
         nargs="+",
-        choices=["trend", "breakdown", "bull"],
+        choices=["trend", "bull"],
         default=["trend"],
         help="Strategy or strategies to run (default: both)",
     )
@@ -78,7 +76,6 @@ def run_backtest(args: argparse.Namespace) -> None:
     from backtest.plotter import plot_equity_and_drawdown
 
     import signals.trend_following as tf_strategy
-    import signals.breakdown as bd_strategy
     import signals.trend_bull as bull_strategy
 
     for symbol in args.symbol:
@@ -95,10 +92,6 @@ def run_backtest(args: argparse.Namespace) -> None:
                 )
             elif strategy_name == "bull":
                 df = bull_strategy.generate_signals(
-                    symbol, args.start, args.end, testnet=config.BINANCE_TESTNET
-                )
-            else:
-                df = bd_strategy.generate_signals(
                     symbol, args.start, args.end, testnet=config.BINANCE_TESTNET
                 )
 
